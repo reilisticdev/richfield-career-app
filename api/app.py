@@ -5,8 +5,9 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
+# Load for local dev; Vercel will ignore this and use its own settings in production
 load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 app = Flask(__name__)
 
@@ -14,8 +15,9 @@ def call_gemini(prompt, is_json=True):
     client = genai.Client(api_key=API_KEY)
     config = types.GenerateContentConfig(response_mime_type="application/json") if is_json else None
     
+    # Using gemini-2.0-flash as gemini-2.5 is not a standard release yet
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-2.0-flash',
         contents=prompt,
         config=config
     )
@@ -123,13 +125,16 @@ def chat():
         3. Keep it conversational, encouraging, and concise (2 short paragraphs max). Do not use complex markdown formatting.
         """
         
-        # Call Gemini requesting plain text, not JSON
         response_text = call_gemini(prompt, is_json=False)
         return jsonify({"response": response_text})
         
     except Exception as e:
         print(f"Chat API Error: {e}")
         return jsonify({"response": "I'm experiencing a bit of network traffic right now. Could you ask me that again?"})
+
+# VERCEL HANDLER: This lets the cloud run your app
+def handler(request):
+    return app(request)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
