@@ -12,7 +12,6 @@ app = Flask(__name__)
 
 def call_gemini(prompt, is_json=True):
     client = genai.Client(api_key=API_KEY)
-    # Changed from 2.5 to 2.0 to prevent server crashes
     model_id = 'gemini-2.0-flash'
     
     config = types.GenerateContentConfig(response_mime_type="application/json") if is_json else None
@@ -60,7 +59,6 @@ def match():
         """
         return jsonify(call_gemini(prompt, is_json=True))
     except Exception as e:
-        print(f"Match API Error: {e}")
         return jsonify({"error": "Failed to generate roadmap."}), 500
 
 # --- ROUTE 2: THE DREAM JOB PIVOT ---
@@ -138,12 +136,7 @@ def chat():
         return jsonify({"response": response_text})
         
     except Exception as e:
-        print(f"Chat API Error: {e}")
         return jsonify({"response": "I'm experiencing a bit of network traffic right now. Could you ask me that again?"})
-
-# VERCEL HANDLER: This lets the cloud run your app
-def handler(request):
-    return app(request)
 
 if __name__ == '__main__':
     app.run()
