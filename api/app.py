@@ -5,7 +5,6 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-# Load for local dev; Vercel will ignore this and use its own settings in production
 load_dotenv()
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
@@ -13,19 +12,23 @@ app = Flask(__name__)
 
 def call_gemini(prompt, is_json=True):
     client = genai.Client(api_key=API_KEY)
+    # Changed from 2.5 to 2.0 to prevent server crashes
+    model_id = 'gemini-2.0-flash'
+    
     config = types.GenerateContentConfig(response_mime_type="application/json") if is_json else None
     
-    # Using gemini-2.0-flash as gemini-2.5 is not a standard release yet
     response = client.models.generate_content(
-        model='gemini-2.0-flash',
+        model=model_id,
         contents=prompt,
         config=config
     )
     return json.loads(response.text) if is_json else response.text
 
 # --- ROUTE 1: THE CORE ROADMAP ---
-@app.route('/api/match', methods=['POST'])
+@app.route('/api/match', methods=['GET', 'POST'])
 def match():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
     try:
         data = request.json
         scores = data.get('scores', [50, 50, 50, 50, 50])
@@ -61,8 +64,10 @@ def match():
         return jsonify({"error": "Failed to generate roadmap."}), 500
 
 # --- ROUTE 2: THE DREAM JOB PIVOT ---
-@app.route('/api/pivot', methods=['POST'])
+@app.route('/api/pivot', methods=['GET', 'POST'])
 def pivot():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
     try:
         data = request.json
         scores = data.get('scores', [])
@@ -84,8 +89,10 @@ def pivot():
         return jsonify({"feasibility_score": 50, "gap_analysis": "System busy.", "richfield_bridge": "Use electives.", "market_reality": "Market fluctuates."})
 
 # --- ROUTE 3: THE POSTGRADUATE PATHWAY ---
-@app.route('/api/postgrad', methods=['POST'])
+@app.route('/api/postgrad', methods=['GET', 'POST'])
 def postgrad():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
     try:
         data = request.json
         program = data.get('program', '')
@@ -105,8 +112,10 @@ def postgrad():
         return jsonify({"career_multiplier": "Increases earnings.", "focus_areas": "Advanced theory.", "comparison_note": "Postgrads enter at management level."})
 
 # --- ROUTE 4: THE RICHFIELD CHATBOT ---
-@app.route('/api/chat', methods=['POST'])
+@app.route('/api/chat', methods=['GET', 'POST'])
 def chat():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
     try:
         data = request.json
         message = data.get('message', '')
@@ -137,4 +146,4 @@ def handler(request):
     return app(request)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run()
