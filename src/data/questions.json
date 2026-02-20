@@ -1,0 +1,152 @@
+[
+  {
+    "id": 1,
+    "text": "You just received R1 Million to launch a startup. Where do you spend the first R500k?",
+    "options": [
+      { "text": "Build a flawless, highly secure backend architecture.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Hire a killer sales and marketing team to drive revenue.", "weights": [0, 3, 1, 0, 0] },
+      { "text": "Design a beautiful, intuitive app interface that users will love.", "weights": [1, 0, 0, 3, 0] },
+      { "text": "Invest in community outreach and user focus groups.", "weights": [0, 0, 3, 0, 0] }
+    ]
+  },
+  {
+    "id": 2,
+    "text": "It is 9 AM on a Monday and your company's main system just crashed. What is your instinct?",
+    "options": [
+      { "text": "Dive straight into the system logs to find the exact line of failing code.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Calculate the financial cost of the downtime and brief the CEO.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Jump on a call with angry clients to calm them down and manage the relationship.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Brainstorm a quick, out-of-the-box workaround to get things limping along.", "weights": [1, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 3,
+    "text": "You are handed a massive, disorganized spreadsheet with 10,000 rows of customer data. What's your move?",
+    "options": [
+      { "text": "Write a Python script or SQL query to clean and sort it automatically.", "weights": [3, 0, 0, 0, 0] },
+      { "text": "Analyze it to find purchasing trends and profit margins.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Look at the demographics to understand who these customers actually are.", "weights": [0, 1, 2, 0, 0] },
+      { "text": "Turn the raw numbers into a visually stunning, easy-to-read infographic.", "weights": [0, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 4,
+    "text": "Your local municipality is struggling with poor service delivery. How do you fix it?",
+    "options": [
+      { "text": "Implement smart-city IoT sensors to track resource allocation.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Audit the municipal budget to cut wasteful spending and stop corruption.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Rewrite the zoning laws and compliance policies to enforce stricter rules.", "weights": [0, 2, 1, 0, 0] },
+      { "text": "Hold community town halls to hear the citizens' grievances directly.", "weights": [0, 0, 3, 0, 0] }
+    ]
+  },
+  {
+    "id": 5,
+    "text": "If you had to start a side hustle this weekend, what would it be?",
+    "options": [
+      { "text": "Building a custom app, matching engine, or web scraper.", "weights": [3, 0, 0, 0, 0] },
+      { "text": "Dropshipping, day trading, or flipping items for a profit.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Event planning or starting a coaching/mentoring group.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Photography, graphic design, or content creation.", "weights": [0, 0, 0, 3, 1] }
+    ]
+  },
+  {
+    "id": 6,
+    "text": "When you read about Artificial Intelligence taking over jobs, what do you think?",
+    "options": [
+      { "text": "I need to learn how to build and train these AI models myself.", "weights": [3, 0, 0, 0, 0] },
+      { "text": "How can I use this AI to automate my business and increase profit?", "weights": [0, 3, 0, 0, 0] },
+      { "text": "How is this going to impact the mental health of the working class?", "weights": [0, 0, 3, 0, 0] },
+      { "text": "I want to use AI tools to generate new art, music, and designs.", "weights": [0, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 7,
+    "text": "You are put in a group project. Which role do you naturally claim?",
+    "options": [
+      { "text": "The Architect: I figure out the logical structure and do the heavy technical lifting.", "weights": [3, 0, 0, 0, 0] },
+      { "text": "The Project Manager: I set the deadlines, manage the timeline, and ensure an 'A'.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "The Mediator: I make sure everyone is getting along and communicating well.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "The Presenter: I design the slide deck and deliver the pitch to the room.", "weights": [0, 1, 1, 3, 0] }
+    ]
+  },
+  {
+    "id": 8,
+    "text": "A massive corporate hack makes the news. What part of the story fascinates you most?",
+    "options": [
+      { "text": "The digital forensics used to track the hackers' digital footprints.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "The legal loopholes and lack of corporate compliance that allowed it.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "The psychological profile and motives of the cybercriminals.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "The PR strategy used to repair the company's public image.", "weights": [0, 1, 1, 2, 0] }
+    ]
+  },
+  {
+    "id": 9,
+    "text": "What does your ideal Tuesday afternoon look like?",
+    "options": [
+      { "text": "Noise-canceling headphones on, deep into writing complex logic.", "weights": [3, 0, -1, 0, 0] },
+      { "text": "In a boardroom, pitching a strategy to high-level executives.", "weights": [0, 3, 1, 0, 0] },
+      { "text": "Mentoring a junior staff member or leading a team workshop.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Whiteboarding completely new, untested ideas with no strict rules.", "weights": [0, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 10,
+    "text": "In 20 years, what do you want your legacy to be?",
+    "options": [
+      { "text": "I built complex, secure technologies that pushed the world forward.", "weights": [3, 0, 0, 0, 0] },
+      { "text": "I built massive wealth, ran successful companies, and mastered the market.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "I positively impacted thousands of lives and shaped my community.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "I created innovative, beautiful products that people love to use.", "weights": [1, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 11,
+    "text": "A client is furious because a software feature isn't working as they imagined. How do you handle it?",
+    "options": [
+      { "text": "Check the backend logic to prove the system is functioning exactly as coded.", "weights": [3, 0, -1, 0, 0] },
+      { "text": "Review the initial contract and negotiate a fee to build the new changes.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Set up a face-to-face meeting to mediate the issue and save the relationship.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Quickly design a visual prototype to show them a better alternative.", "weights": [0, 0, 0, 3, 1] }
+    ]
+  },
+  {
+    "id": 12,
+    "text": "A brand new, disruptive technology (like Blockchain or Quantum Computing) is announced. What do you do?",
+    "options": [
+      { "text": "Read the technical documentation to understand how the architecture works.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Analyze the market cap to see if there are investment or business opportunities.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Worry about the ethical implications and how it will affect average people.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Brainstorm how to use it to create new forms of digital media or art.", "weights": [0, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 13,
+    "text": "You are hired to rescue a struggling local business. What is your first priority?",
+    "options": [
+      { "text": "Automate their inventory and point-of-sale system to remove human error.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Audit their cash flow, restructure debt, and cut unnecessary expenses.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Retrain the staff and boost employee morale to improve customer service.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Rebrand their logo and launch a viral, creative social media campaign.", "weights": [0, 0, 0, 3, 0] }
+    ]
+  },
+  {
+    "id": 14,
+    "text": "If Richfield offered you a free masterclass, which one are you attending?",
+    "options": [
+      { "text": "Advanced Cloud Architecture & Penetration Testing.", "weights": [3, 0, 0, 0, 1] },
+      { "text": "Financial Forecasting, Corporate Law & Risk Management.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "Advanced Leadership, Public Governance & Conflict Resolution.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "Advanced UI/UX Design & Consumer Psychology.", "weights": [0, 0, 0, 3, 1] }
+    ]
+  },
+  {
+    "id": 15,
+    "text": "You are completing your final year Capstone project at Richfield. What are you submitting?",
+    "options": [
+      { "text": "A fully functional, bug-free software application or network framework.", "weights": [3, 0, 0, 0, 2] },
+      { "text": "A comprehensive business plan with 5-year financial and market projections.", "weights": [0, 3, 0, 0, 0] },
+      { "text": "A detailed public administration policy framework for local municipalities.", "weights": [0, 0, 3, 0, 0] },
+      { "text": "An interactive, visually stunning app prototype that redefines user experience.", "weights": [1, 0, 0, 3, 1] }
+    ]
+  }
+]
