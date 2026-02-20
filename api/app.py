@@ -13,7 +13,7 @@ def call_gemini(prompt, is_json=True):
         raise ValueError("CRITICAL: GEMINI_API_KEY is missing from Vercel's Environment Variables!")
         
     client = genai.Client(api_key=API_KEY)
-    model_id = 'gemini-1.5-flash'
+    model_id = 'gemini-2.0-flash'
     
     config = types.GenerateContentConfig(response_mime_type="application/json") if is_json else None
     
