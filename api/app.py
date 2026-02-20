@@ -13,6 +13,7 @@ def call_gemini(prompt, is_json=True):
         raise ValueError("CRITICAL: GEMINI_API_KEY is missing from Vercel's Environment Variables!")
         
     client = genai.Client(api_key=API_KEY)
+    # Using the correct, active 2026 free tier model
     model_id = 'gemini-2.5-flash'
     
     config = types.GenerateContentConfig(response_mime_type="application/json") if is_json else None
@@ -37,6 +38,7 @@ def call_gemini(prompt, is_json=True):
         
     return raw_text
 
+# --- ROUTE 1: CORE ROADMAP ---
 @app.route('/api/match', methods=['GET', 'POST'])
 def match():
     if request.method == 'GET':
@@ -63,11 +65,9 @@ def match():
         """
         return jsonify(call_gemini(prompt, is_json=True))
     except Exception as e:
-        error_msg = str(e)
-        print(f"BACKEND CRASH: {error_msg}")
-        # This will send the exact error directly to your frontend!
-        return jsonify({"error": f"Backend Error: {error_msg}"}), 500
+        return jsonify({"error": f"Backend Error: {str(e)}"}), 500
 
+# --- ROUTE 2: CHATBOT ---
 @app.route('/api/chat', methods=['GET', 'POST'])
 def chat():
     if request.method == 'GET':
@@ -82,6 +82,54 @@ def chat():
         return jsonify({"response": call_gemini(prompt, is_json=False)})
     except Exception as e:
         return jsonify({"response": f"AI Error: {str(e)}"}), 500
+
+# --- ROUTE 3: DREAM JOB PIVOT ---
+@app.route('/api/pivot', methods=['GET', 'POST'])
+def pivot():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
+    try:
+        data = request.json
+        scores = data.get('scores', [])
+        program = data.get('program', '')
+        dream_job = data.get('dream_job', '')
+        
+        prompt = f"""
+        A Richfield student in '{program}' with psych scores {scores} wants to become a '{dream_job}'. Context: 2026 South Africa.
+        Return exactly this JSON structure:
+        {{
+            "feasibility_score": 75,
+            "gap_analysis": "Personality/skills they are missing.",
+            "richfield_bridge": "How to use Richfield electives/badges to pivot.",
+            "market_reality": "2026 SA stats on this role."
+        }}
+        """
+        return jsonify(call_gemini(prompt, is_json=True))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- ROUTE 4: POSTGRADUATE PATHWAY ---
+@app.route('/api/postgrad', methods=['GET', 'POST'])
+def postgrad():
+    if request.method == 'GET':
+        return jsonify({"status": "API is online."})
+    try:
+        data = request.json
+        program = data.get('program', '')
+        postgrad_choice = data.get('postgrad_choice', '')
+        
+        prompt = f"""
+        A Richfield grad in '{program}' wants to pursue '{postgrad_choice}'. Context: 2026 SA Market.
+        Return exactly this JSON structure:
+        {{
+            "career_multiplier": "How this boosts salary/seniority.",
+            "focus_areas": "Top 2 advanced research areas.",
+            "comparison_note": "Undergrad vs Postgrad comparison."
+        }}
+        """
+        return jsonify(call_gemini(prompt, is_json=True))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run()
