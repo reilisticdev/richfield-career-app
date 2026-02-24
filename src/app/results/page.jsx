@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from '../../lib/supabase'; // Injecting the database connection
+import { supabase } from '../../lib/supabase'; 
+import ReactMarkdown from 'react-markdown'; // The new Markdown parser
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -43,7 +44,6 @@ export default function ResultsScreen() {
 
     const fetchInitialRoadmap = async () => {
       try {
-        // 1. Fetch the roadmap from your Gemini backend
         const response = await fetch("/api/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -52,16 +52,16 @@ export default function ResultsScreen() {
         const data = await response.json();
         setRoadmapData(data);
 
-        // 2. The Enterprise Data Capture (Supabase Update)
+        // Supabase Enterprise Data Capture
         const dbId = localStorage.getItem('student_db_id');
         if (dbId) {
           const { error: updateError } = await supabase
             .from('student_leads')
             .update({
-              psych_scores: parsedVector, // Saves their raw vector array
-              roadmap_result: data        // Saves the entire Gemini JSON output
+              psych_scores: parsedVector, 
+              roadmap_result: data        
             })
-            .eq('id', dbId); // Finds the exact row created on the landing page
+            .eq('id', dbId); 
 
           if (updateError) {
             console.error("Failed to sync AI results to Supabase:", updateError);
@@ -336,8 +336,23 @@ export default function ResultsScreen() {
             
             <div className="flex-1 p-5 overflow-y-auto bg-gray-50 flex flex-col gap-4">
               {chatMessages.map((msg, i) => (
-                <div key={i} className={`p-4 rounded-2xl max-w-[90%] text-base font-semibold leading-relaxed shadow-sm ${msg.role === 'assistant' ? 'bg-white border-2 border-gray-200 text-gray-900 self-start rounded-tl-sm' : 'bg-blue-700 text-white self-end rounded-tr-sm'}`}>
-                  {msg.content}
+                <div key={i} className={`p-4 rounded-2xl max-w-[90%] text-base shadow-sm ${msg.role === 'assistant' ? 'bg-white border-2 border-gray-200 text-gray-900 self-start rounded-tl-sm' : 'bg-blue-700 text-white self-end rounded-tr-sm font-semibold'}`}>
+                  {msg.role === 'assistant' ? (
+                    <ReactMarkdown 
+                      components={{
+                        p: ({node, ...props}) => <p className="mb-3 last:mb-0 font-medium leading-relaxed" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-black text-blue-900" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-black mt-4 mb-2 text-blue-800 uppercase tracking-wide border-b border-gray-200 pb-1" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 space-y-1 font-medium" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 space-y-1 font-medium" {...props} />,
+                        li: ({node, ...props}) => <li className="pl-1 leading-relaxed" {...props} />,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               ))}
               {isChatLoading && (
