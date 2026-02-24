@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from '../../lib/supabase'; // Injecting the database connection
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function ResultsScreen() {
 
     const fetchInitialRoadmap = async () => {
       try {
+        // 1. Fetch the roadmap from your Gemini backend
         const response = await fetch("/api/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -49,6 +51,23 @@ export default function ResultsScreen() {
         });
         const data = await response.json();
         setRoadmapData(data);
+
+        // 2. The Enterprise Data Capture (Supabase Update)
+        const dbId = localStorage.getItem('student_db_id');
+        if (dbId) {
+          const { error: updateError } = await supabase
+            .from('student_leads')
+            .update({
+              psych_scores: parsedVector, // Saves their raw vector array
+              roadmap_result: data        // Saves the entire Gemini JSON output
+            })
+            .eq('id', dbId); // Finds the exact row created on the landing page
+
+          if (updateError) {
+            console.error("Failed to sync AI results to Supabase:", updateError);
+          }
+        }
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -126,11 +145,8 @@ export default function ResultsScreen() {
     }
   };
 
-  // QoL Feature: Allows users to hand the phone to a friend
   const handleRetake = () => {
     localStorage.removeItem("userVector");
-    // We keep 'richfieldUser' so they don't have to retype their name if they don't want to, 
-    // but clearing it completely is safer for a fresh user.
     localStorage.clear(); 
     router.push("/");
   };
