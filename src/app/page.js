@@ -36,6 +36,7 @@ export default function IntakeScreen() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // 1. Verify it's a valid Richfield domain
     const emailDomain = formData.email.toLowerCase();
     if (!emailDomain.endsWith('@my.richfield.ac.za') && !emailDomain.endsWith('@richfield.ac.za')) {
       alert("Access Denied: Please use your official Richfield student email to continue.");
@@ -44,6 +45,23 @@ export default function IntakeScreen() {
     }
 
     try {
+      // --- THE NEW SAFEGUARD CHECK ---
+      // We ask Supabase if this email already exists before we do anything else.
+      const { data: existingUser, error: checkError } = await supabase
+        .from('student_leads')
+        .select('id')
+        .eq('email', formData.email)
+        .maybeSingle(); 
+
+      // If existingUser has data, it means they already took the quiz!
+      if (existingUser) {
+        alert("It looks like you already have a roadmap! Redirecting you to the Student Portal to log in securely.");
+        setIsSubmitting(false);
+        router.push("/login"); // Automatically send them to the login page
+        return; // Stop the code here so they don't overwrite their data
+      }
+
+      // --- IF THEY ARE NEW, PROCEED NORMALLY ---
       const { data, error } = await supabase
         .from('student_leads')
         .insert([
@@ -60,7 +78,7 @@ export default function IntakeScreen() {
 
       if (error) {
         console.error("Database Error:", error);
-        alert("Database error: Could not save your details. You might have already registered with this email.");
+        alert("Database error: Could not save your details.");
         setIsSubmitting(false);
         return; 
       }
@@ -177,7 +195,7 @@ export default function IntakeScreen() {
         </div>
       </form>
 
-      {/* --- THIS IS THE NEW LINK TO THE PORTAL --- */}
+      {/* --- THE LINK TO THE PORTAL --- */}
       <div className="mt-12 text-center w-full max-w-md mx-auto">
         <div className="border-t-2 border-gray-100 pt-8">
           <p className="text-xs font-black text-gray-400 mb-3 uppercase tracking-widest">Already have a roadmap?</p>
