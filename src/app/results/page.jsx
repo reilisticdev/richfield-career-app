@@ -11,18 +11,14 @@ export default function ResultsScreen() {
   
   const [userData, setUserData] = useState(null);
   const [userVector, setUserVector] = useState(null);
-  
   const [activeTab, setActiveTab] = useState("roadmap"); 
-  
   const [roadmapData, setRoadmapData] = useState(null);
   const [pivotData, setPivotData] = useState(null);
   const [postgradData, setPostgradData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
-
   const [dreamJobInput, setDreamJobInput] = useState("");
   const [postgradSelect, setPostgradSelect] = useState("");
-
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -31,43 +27,39 @@ export default function ResultsScreen() {
   ]);
 
   useEffect(() => {
-    const loadStudentData = async () => {
+    const loadDashboardData = async () => {
       try {
-        // --- BRAIN 2: Check for a returning student via Magic Link ---
+        // --- SCENARIO 1: THE RETURNING STUDENT (Magic Link) ---
+        // Check if Supabase has an active, secure session
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
-          console.log("Returning student detected:", session.user.email);
-          
-          // Fetch their saved data from the database
-          const { data: studentData, error } = await supabase
+          // They are logged in! Fetch their saved data directly from your database
+          const { data: dbData, error: dbError } = await supabase
             .from('student_leads')
             .select('*')
             .eq('email', session.user.email)
             .single();
 
-          if (error) throw error;
-
-          if (studentData && studentData.roadmap_result) {
-            // Load their exact saved state into the UI
-            setUserData({ 
-              firstName: studentData.first_name, 
-              program: studentData.current_program 
+          if (dbData && !dbError) {
+            setUserData({
+              firstName: dbData.first_name,
+              lastName: dbData.last_name,
+              program: dbData.current_program,
             });
-            setUserVector(studentData.psych_scores);
-            setRoadmapData(studentData.roadmap_result);
+            setUserVector(dbData.psych_scores);
+            setRoadmapData(dbData.roadmap_result);
             setIsLoading(false);
-            return; // Stop here! They are fully loaded.
+            return; // Stop here! We have everything we need.
           }
         }
 
-        // --- BRAIN 1: Handle a brand new student coming from the quiz ---
+        // --- SCENARIO 2: THE NEW STUDENT (Just finished quiz) ---
         const storedUser = localStorage.getItem("richfieldUser");
         const storedVector = localStorage.getItem("userVector");
 
         if (!storedUser || !storedVector) {
-          router.push("/"); 
-          return;
+          router.push("/"); return;
         }
 
         const parsedUser = JSON.parse(storedUser);
@@ -75,49 +67,44 @@ export default function ResultsScreen() {
         setUserData(parsedUser);
         setUserVector(parsedVector);
 
-        // Generate their new AI Roadmap
+        // Fetch fresh roadmap from Gemini API
         const response = await fetch("/api/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ scores: parsedVector, program: parsedUser.program }),
         });
-        const data = await response.json();
-        setRoadmapData(data);
+        const aiData = await response.json();
+        setRoadmapData(aiData);
 
-        // Save this new roadmap to Supabase
+        // Save new results to Supabase
         const dbId = localStorage.getItem('student_db_id');
         if (dbId) {
-          const { error: updateError } = await supabase
+          await supabase
             .from('student_leads')
             .update({
               psych_scores: parsedVector, 
-              roadmap_result: data        
+              roadmap_result: aiData        
             })
             .eq('id', dbId); 
-
-          if (updateError) {
-            console.error("Failed to sync AI results to Supabase:", updateError);
-          }
         }
 
       } catch (error) {
-        console.error("Error loading roadmap:", error);
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadStudentData();
+    loadDashboardData();
   }, [router]);
 
-  // ... THE REST OF YOUR CODE REMAINS EXACTLY THE SAME ...
-  
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages, isChatOpen]);
 
+  // --- API Handlers ---
   const handlePivotSubmit = async (e) => {
     e.preventDefault();
     if (!dreamJobInput) return;
@@ -181,19 +168,24 @@ export default function ResultsScreen() {
   };
 
   const handleRetake = async () => {
-    // Log them out of Supabase if they want to retake entirely
-    await supabase.auth.signOut();
+    await supabase.auth.signOut(); // Securely log them out
     localStorage.removeItem("userVector");
     localStorage.clear(); 
     router.push("/");
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    router.push("/login");
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-6 text-center">
         <div className="w-20 h-20 border-8 border-blue-600 border-t-transparent rounded-full animate-spin mb-8 shadow-2xl"></div>
-        <h2 className="text-white text-2xl font-black mb-2">Loading Your Dashboard</h2>
-        <p className="text-gray-300 font-bold text-lg">Retrieving your secure career vector...</p>
+        <h2 className="text-white text-2xl font-black mb-2">Accessing Dashboard</h2>
+        <p className="text-gray-300 font-bold text-lg">Retrieving your 2026 Richfield Roadmap...</p>
       </div>
     );
   }
@@ -212,7 +204,7 @@ export default function ResultsScreen() {
           </div>
         </div>
 
-        {/* MOBILE-FIRST TABS */}
+        {/* TABS */}
         <div className="flex flex-col sm:flex-row gap-3 w-full mb-10">
           {["roadmap", "pivot", "postgrad"].map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)}
@@ -349,13 +341,16 @@ export default function ResultsScreen() {
           </div>
         )}
 
-        {/* QoL Retake Button */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-500 font-bold text-sm mb-4">Diagnostics powered by Richfield 2026 Academic Prospectus.</p>
-          <button onClick={handleRetake} className="px-8 py-4 bg-gray-200 text-gray-800 font-black rounded-2xl border-2 border-gray-300 hover:bg-gray-300 active:scale-95 transition-all uppercase tracking-widest text-sm shadow-sm">
-            Logout & Retake Assessment
+        {/* Security & System Actions */}
+        <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button onClick={handleRetake} className="px-6 py-3 bg-gray-200 text-gray-800 font-black rounded-xl border-2 border-gray-300 hover:bg-gray-300 active:scale-95 transition-all uppercase tracking-widest text-xs shadow-sm">
+            Retake Assessment
+          </button>
+          <button onClick={handleSignOut} className="px-6 py-3 bg-red-100 text-red-700 font-black rounded-xl border-2 border-red-200 hover:bg-red-200 active:scale-95 transition-all uppercase tracking-widest text-xs shadow-sm">
+            Sign Out
           </button>
         </div>
+        <p className="text-gray-500 font-bold text-xs text-center mt-6">Diagnostics powered by Richfield 2026 Academic Prospectus.</p>
 
       </div>
 

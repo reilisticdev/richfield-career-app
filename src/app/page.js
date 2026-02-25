@@ -36,16 +36,14 @@ export default function IntakeScreen() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // 🛑 The Student Email Validator
     const emailDomain = formData.email.toLowerCase();
     if (!emailDomain.endsWith('@my.richfield.ac.za') && !emailDomain.endsWith('@richfield.ac.za')) {
-      alert("Access Denied: Please use your official Richfield student email (e.g., 123456789@my.richfield.ac.za) to continue.");
+      alert("Access Denied: Please use your official Richfield student email to continue.");
       setIsSubmitting(false);
-      return; // Stops the function from hitting the database
+      return; 
     }
 
     try {
-      // Send the data to your Supabase table
       const { data, error } = await supabase
         .from('student_leads')
         .insert([
@@ -67,7 +65,6 @@ export default function IntakeScreen() {
         return; 
       }
 
-      // Save their unique Database ID to the browser for the quiz results
       if (data && data.length > 0) {
         localStorage.setItem('student_db_id', data[0].id);
       }
@@ -178,8 +175,25 @@ export default function IntakeScreen() {
             )}
           </button>
         </div>
-        
       </form>
+
+      {/* --- THIS IS THE NEW LINK TO THE PORTAL --- */}
+      <div className="mt-12 text-center w-full max-w-md mx-auto">
+        <div className="border-t-2 border-gray-100 pt-8">
+          <p className="text-xs font-black text-gray-400 mb-3 uppercase tracking-widest">Already have a roadmap?</p>
+          <button 
+            type="button"
+            onClick={() => router.push('/login')}
+            className="w-full bg-white text-blue-700 border-2 border-blue-100 font-black text-base py-4 rounded-2xl shadow-sm hover:bg-blue-50 active:scale-95 transition-all flex justify-center items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            STUDENT LOGIN PORTAL
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
