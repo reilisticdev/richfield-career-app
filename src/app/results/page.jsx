@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from '../../lib/supabase'; 
-import ReactMarkdown from 'react-markdown'; // The new Markdown parser
+import ReactMarkdown from 'react-markdown'; 
 
 export default function ResultsScreen() {
   const router = useRouter();
@@ -31,19 +31,51 @@ export default function ResultsScreen() {
   ]);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("richfieldUser");
-    const storedVector = localStorage.getItem("userVector");
-
-    if (!storedUser || !storedVector) {
-      router.push("/"); return;
-    }
-    const parsedUser = JSON.parse(storedUser);
-    const parsedVector = JSON.parse(storedVector);
-    setUserData(parsedUser);
-    setUserVector(parsedVector);
-
-    const fetchInitialRoadmap = async () => {
+    const loadStudentData = async () => {
       try {
+        // --- BRAIN 2: Check for a returning student via Magic Link ---
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          console.log("Returning student detected:", session.user.email);
+          
+          // Fetch their saved data from the database
+          const { data: studentData, error } = await supabase
+            .from('student_leads')
+            .select('*')
+            .eq('email', session.user.email)
+            .single();
+
+          if (error) throw error;
+
+          if (studentData && studentData.roadmap_result) {
+            // Load their exact saved state into the UI
+            setUserData({ 
+              firstName: studentData.first_name, 
+              program: studentData.current_program 
+            });
+            setUserVector(studentData.psych_scores);
+            setRoadmapData(studentData.roadmap_result);
+            setIsLoading(false);
+            return; // Stop here! They are fully loaded.
+          }
+        }
+
+        // --- BRAIN 1: Handle a brand new student coming from the quiz ---
+        const storedUser = localStorage.getItem("richfieldUser");
+        const storedVector = localStorage.getItem("userVector");
+
+        if (!storedUser || !storedVector) {
+          router.push("/"); 
+          return;
+        }
+
+        const parsedUser = JSON.parse(storedUser);
+        const parsedVector = JSON.parse(storedVector);
+        setUserData(parsedUser);
+        setUserVector(parsedVector);
+
+        // Generate their new AI Roadmap
         const response = await fetch("/api/match", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -52,7 +84,7 @@ export default function ResultsScreen() {
         const data = await response.json();
         setRoadmapData(data);
 
-        // Supabase Enterprise Data Capture
+        // Save this new roadmap to Supabase
         const dbId = localStorage.getItem('student_db_id');
         if (dbId) {
           const { error: updateError } = await supabase
@@ -69,14 +101,17 @@ export default function ResultsScreen() {
         }
 
       } catch (error) {
-        console.error(error);
+        console.error("Error loading roadmap:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchInitialRoadmap();
+
+    loadStudentData();
   }, [router]);
 
+  // ... THE REST OF YOUR CODE REMAINS EXACTLY THE SAME ...
+  
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -145,7 +180,9 @@ export default function ResultsScreen() {
     }
   };
 
-  const handleRetake = () => {
+  const handleRetake = async () => {
+    // Log them out of Supabase if they want to retake entirely
+    await supabase.auth.signOut();
     localStorage.removeItem("userVector");
     localStorage.clear(); 
     router.push("/");
@@ -155,8 +192,8 @@ export default function ResultsScreen() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 p-6 text-center">
         <div className="w-20 h-20 border-8 border-blue-600 border-t-transparent rounded-full animate-spin mb-8 shadow-2xl"></div>
-        <h2 className="text-white text-2xl font-black mb-2">Analyzing Your Vector</h2>
-        <p className="text-gray-300 font-bold text-lg">Cross-referencing the 2026 Richfield Prospectus & Market Data...</p>
+        <h2 className="text-white text-2xl font-black mb-2">Loading Your Dashboard</h2>
+        <p className="text-gray-300 font-bold text-lg">Retrieving your secure career vector...</p>
       </div>
     );
   }
@@ -316,7 +353,7 @@ export default function ResultsScreen() {
         <div className="mt-12 text-center">
           <p className="text-gray-500 font-bold text-sm mb-4">Diagnostics powered by Richfield 2026 Academic Prospectus.</p>
           <button onClick={handleRetake} className="px-8 py-4 bg-gray-200 text-gray-800 font-black rounded-2xl border-2 border-gray-300 hover:bg-gray-300 active:scale-95 transition-all uppercase tracking-widest text-sm shadow-sm">
-            Retake Assessment
+            Logout & Retake Assessment
           </button>
         </div>
 
