@@ -4,85 +4,67 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from '../lib/supabase';
 
-export default function IntakeScreen() {
+// Comprehensive Richfield Undergrad Programmes
+const richfieldPrograms = [
+  "Bachelor of Science in Information Technology",
+  "Diploma in Information Technology",
+  "Higher Certificate in Information Technology",
+  "Higher Certificate in Computer Forensics",
+  "Bachelor of Commerce (BCom) - Route 1 (AGA)",
+  "Bachelor of Commerce (BCom) - Route 2 (PGDA)",
+  "Bachelor of Business Administration (BBA)",
+  "Bachelor of Public Management",
+  "Diploma in Business Administration",
+  "Diploma in Local Government Management",
+  "Higher Certificate in Business Administration",
+  "Higher Certificate in Office Administration",
+  "Higher Certificate in Local Government Management"
+];
+
+export default function RichfieldLandingPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     program: "",
-    studyPreference: "Contact",
-    postgradInterest: "No",
+    campus: "Richfield",
+    userCategory: "university" 
   });
-
-  const programs = [
-    "Bachelor of Science in Information Technology",
-    "Diploma in Information Technology",
-    "Higher Certificate in Information Technology",
-    "Higher Certificate in Computer Forensics",
-    "Bachelor of Commerce (BCom)",
-    "BCom for SAICA Pathways",
-    "Bachelor of Business Administration (BBA)",
-    "Bachelor of Public Management",
-    "Diploma in Business Administration",
-    "Diploma in Local Government Management",
-    "Higher Certificate in Business Administration",
-    "Higher Certificate in Office Administration",
-    "Higher Certificate in Local Government Management"
-  ];
 
   const handleStart = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // 1. Verify it's a valid Richfield domain
-    const emailDomain = formData.email.toLowerCase();
-    if (!emailDomain.endsWith('@my.richfield.ac.za') && !emailDomain.endsWith('@richfield.ac.za')) {
-      alert("Access Denied: Please use your official Richfield student email to continue.");
+    const emailLower = formData.email.toLowerCase();
+    if (!emailLower.endsWith('@my.richfield.ac.za') && !emailLower.endsWith('@richfield.ac.za')) {
+      alert("Access Denied: Please use your official Richfield student email (e.g., 123456789@my.richfield.ac.za) to generate a roadmap.");
       setIsSubmitting(false);
       return; 
     }
 
     try {
-      // --- THE NEW SAFEGUARD CHECK ---
-      // We ask Supabase if this email already exists before we do anything else.
-      const { data: existingUser, error: checkError } = await supabase
-        .from('student_leads')
-        .select('id')
-        .eq('email', formData.email)
-        .maybeSingle(); 
+      const { data: existingUser } = await supabase.from('student_leads').select('id').eq('email', formData.email).maybeSingle(); 
 
-      // If existingUser has data, it means they already took the quiz!
       if (existingUser) {
-        alert("It looks like you already have a roadmap! Redirecting you to the Student Portal to log in securely.");
+        alert("A roadmap already exists for this student! Redirecting to the secure login.");
         setIsSubmitting(false);
-        router.push("/login"); // Automatically send them to the login page
-        return; // Stop the code here so they don't overwrite their data
+        router.push("/login");
+        return; 
       }
 
-      // --- IF THEY ARE NEW, PROCEED NORMALLY ---
-      const { data, error } = await supabase
-        .from('student_leads')
-        .insert([
-          {
+      const { data, error } = await supabase.from('student_leads').insert([{
             first_name: formData.firstName,
             last_name: formData.lastName,
             email: formData.email,
             current_program: formData.program,
-            study_preference: formData.studyPreference,
-            postgrad_intent: formData.postgradInterest
-          }
-        ])
-        .select();
+            institution_name: formData.campus,
+            user_category: formData.userCategory
+        }]).select();
 
-      if (error) {
-        console.error("Database Error:", error);
-        alert("Database error: Could not save your details.");
-        setIsSubmitting(false);
-        return; 
-      }
-
+      if (error) throw error;
       if (data && data.length > 0) {
         localStorage.setItem('student_db_id', data[0].id);
       }
@@ -91,127 +73,99 @@ export default function IntakeScreen() {
       router.push("/quiz");
 
     } catch (err) {
-      console.error("Unexpected Error:", err);
-      alert("An unexpected error occurred.");
+      alert("An error occurred saving your profile. Please check your internet connection.");
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-6 py-10 font-sans sm:px-12 flex flex-col justify-center">
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-600 selection:text-white relative overflow-hidden flex flex-col items-center justify-center p-4 sm:p-8">
       
-      <div className="mb-10 text-center">
-        <h1 className="text-4xl font-black text-gray-900 tracking-tight leading-tight mb-3">
-          Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Richfield</span><br/>Roadmap
-        </h1>
-        <p className="text-lg font-medium text-gray-500">
-          Let's map out your exact career trajectory.
-        </p>
-      </div>
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-400/30 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-[100px] animate-pulse pointer-events-none" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-cyan-400/20 rounded-full mix-blend-multiply filter blur-[80px] pointer-events-none"></div>
 
-      <form onSubmit={handleStart} className="space-y-6 w-full max-w-md mx-auto">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-12 items-center relative z-10">
         
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">First Name</label>
-            <input required type="text" 
-              className="w-full px-5 py-4 text-lg bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900 font-semibold" 
-              value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} 
-              placeholder="e.g. Sipho" />
+        <div className="text-center lg:text-left pt-10 lg:pt-0">
+          <div className="inline-flex items-center justify-center px-4 py-2 bg-blue-100/80 text-blue-700 font-black text-xs rounded-full uppercase tracking-widest mb-6 border border-blue-200/50 backdrop-blur-sm shadow-sm">
+            Richfield Career Architect ⚡️
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Last Name</label>
-            <input required type="text" 
-              className="w-full px-5 py-4 text-lg bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900 font-semibold"
-              value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} 
-              placeholder="e.g. Ndlovu" />
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.05] mb-6">
+            Map your <br className="hidden lg:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              academic future.
+            </span>
+          </h1>
+          <p className="text-lg sm:text-xl font-medium text-slate-600 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
+            Stop guessing your modules. Take the 2-minute AI assessment and generate a hyper-personalized, semester-by-semester roadmap mapped strictly to the Richfield 2026 syllabus.
+          </p>
+          
+          <div className="hidden lg:flex items-center gap-4 text-sm font-bold text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-600 rounded-full"></div> Smart Module Mapping</div>
+            <div className="flex items-center gap-2"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div> Career Diagnostics</div>
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Student Email</label>
-          <input required type="email" 
-            className="w-full px-5 py-4 text-lg bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900 font-semibold"
-            value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} 
-            placeholder="e.g. 123456789@my.richfield.ac.za" />
-        </div>
+        <div className="w-full max-w-md mx-auto lg:mx-0 lg:ml-auto">
+          <form onSubmit={handleStart} className="bg-white/80 backdrop-blur-xl p-8 sm:p-10 border border-white rounded-[2.5rem] shadow-2xl relative">
+            
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full filter blur-2xl opacity-40 pointer-events-none"></div>
 
-        <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Current Program</label>
-          <select required 
-            className="w-full px-5 py-4 text-base bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-gray-900 font-bold appearance-none"
-            value={formData.program} onChange={e => setFormData({...formData, program: e.target.value})}>
-            <option value="" disabled>Select your 2026 program...</option>
-            {programs.map(prog => (
-              <option key={prog} value={prog}>{prog}</option>
-            ))}
-          </select>
-        </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">Student Portal Setup</h2>
 
-        <div className="pt-4 space-y-6">
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Study Preference</label>
-            <div className="flex p-1 bg-gray-100 rounded-2xl">
-              <button type="button" 
-                className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${formData.studyPreference === "Contact" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500"}`}
-                onClick={() => setFormData({...formData, studyPreference: "Contact"})}>
-                On Campus
-              </button>
-              <button type="button" 
-                className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${formData.studyPreference === "Distance" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500"}`}
-                onClick={() => setFormData({...formData, studyPreference: "Distance"})}>
-                Distance
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">First Name</label>
+                  <input required type="text" 
+                    className="w-full px-4 py-3.5 bg-slate-50/50 border-2 border-slate-200 rounded-2xl text-slate-900 font-bold focus:border-blue-500 focus:bg-white outline-none transition-all" 
+                    value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} placeholder="Sipho" />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Last Name</label>
+                  <input required type="text" 
+                    className="w-full px-4 py-3.5 bg-slate-50/50 border-2 border-slate-200 rounded-2xl text-slate-900 font-bold focus:border-blue-500 focus:bg-white outline-none transition-all" 
+                    value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} placeholder="Ndlovu" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Richfield Email</label>
+                <input required type="email" 
+                  className="w-full px-4 py-3.5 bg-slate-50/50 border-2 border-slate-200 rounded-2xl text-slate-900 font-bold focus:border-blue-500 focus:bg-white outline-none transition-all placeholder:font-medium placeholder:text-slate-400" 
+                  value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="e.g. 123456789@my.richfield.ac.za" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">2026 Degree / Program</label>
+                <select required 
+                  className="w-full px-4 py-3.5 bg-slate-50/50 border-2 border-slate-200 rounded-2xl text-slate-900 font-bold focus:border-blue-500 focus:bg-white outline-none transition-all appearance-none cursor-pointer"
+                  value={formData.program} onChange={e => setFormData({...formData, program: e.target.value})}>
+                  <option value="" disabled>Select your enrolled program...</option>
+                  {richfieldPrograms.map((prog) => (
+                    <option key={prog} value={prog}>{prog}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button type="submit" disabled={isSubmitting}
+                className={`w-full mt-8 text-white font-black text-lg py-4 rounded-2xl shadow-xl shadow-blue-600/20 hover:-translate-y-1 active:translate-y-0 transition-all flex justify-center items-center gap-2 border border-blue-500
+                  ${isSubmitting ? 'bg-slate-400 border-slate-400 opacity-80 pointer-events-none' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'}`}>
+                {isSubmitting ? "AUTHENTICATING..." : "START DIAGNOSTIC"}
               </button>
             </div>
+          </form>
+
+          <div className="mt-8 text-center">
+            <button onClick={() => router.push('/login')} className="text-sm font-black text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest flex items-center justify-center gap-2 mx-auto">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+              Student Login Portal
+            </button>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Plan to do Postgrad?</label>
-            <div className="flex p-1 bg-gray-100 rounded-2xl">
-              <button type="button" 
-                className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${formData.postgradInterest === "Yes" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500"}`}
-                onClick={() => setFormData({...formData, postgradInterest: "Yes"})}>
-                Yes, definitely
-              </button>
-              <button type="button" 
-                className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${formData.postgradInterest === "No" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500"}`}
-                onClick={() => setFormData({...formData, postgradInterest: "No"})}>
-                No / Not sure
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-6">
-          <button type="submit" disabled={isSubmitting}
-            className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xl py-5 rounded-2xl shadow-[0_10px_25px_rgba(79,70,229,0.3)] hover:shadow-[0_15px_30px_rgba(79,70,229,0.4)] active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}>
-            {isSubmitting ? "VERIFYING..." : "START ASSESSMENT"}
-            {!isSubmitting && (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            )}
-          </button>
-        </div>
-      </form>
-
-      {/* --- THE LINK TO THE PORTAL --- */}
-      <div className="mt-12 text-center w-full max-w-md mx-auto">
-        <div className="border-t-2 border-gray-100 pt-8">
-          <p className="text-xs font-black text-gray-400 mb-3 uppercase tracking-widest">Already have a roadmap?</p>
-          <button 
-            type="button"
-            onClick={() => router.push('/login')}
-            className="w-full bg-white text-blue-700 border-2 border-blue-100 font-black text-base py-4 rounded-2xl shadow-sm hover:bg-blue-50 active:scale-95 transition-all flex justify-center items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            STUDENT LOGIN PORTAL
-          </button>
         </div>
       </div>
-
     </div>
   );
 }
