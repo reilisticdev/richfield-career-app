@@ -5,36 +5,30 @@ import { useRouter } from "next/navigation";
 import { supabase } from '../../lib/supabase'; 
 import ReactMarkdown from 'react-markdown'; 
 
-// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas
+// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas based STRICTLY on the Prospectus
 const programMajorsMapping = {
   "Bachelor of Science in Information Technology": [
     "Programming", 
     "Emerging Technologies", 
     "IT Management", 
-    "Network Engineering", 
-    "Business Analysis"
+    "Network Engineering"
   ],
   "Diploma in Information Technology": [
     "Programming", 
     "Network Engineering", 
     "Business Analysis"
   ],
-  "Bachelor of Business Administration (BBA)": [
-    "Accounting", 
-    "Human Resource Management", 
-    "Marketing Management", 
-    "Supply Chain Management"
+  "Master of Business Administration (MBA)": [
+    "Entrepreneurship and Innovation 900",
+    "Business Ethics and Corporate Governance 900",
+    "Women in Leadership",
+    "Emerging & Disruptive Technologies"
   ],
-  "Diploma in Business Administration": [
-    "Economics", 
-    "Public Management", 
-    "Human Resource Management", 
-    "Supply Chain Management"
-  ],
-  "Bachelor of Commerce (BCom) - Route 1 (AGA)": [
-    "Taxation", 
-    "Financial Management & Managerial Accounting", 
-    "Auditing and Assurance"
+  "Postgraduate Diploma in Management": [
+     "Operations Management 800",
+     "Entrepreneurship and Innovation 800",
+     "Public Sector Management 800",
+     "Data Analytics for Managers 800"
   ]
 };
 
@@ -70,7 +64,8 @@ export default function ResultsScreen() {
   // Main Fetch Logic
   const fetchRoadmap = async (scores, program, major) => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/match", {
+      // FIX: Changed to relative URL for Vercel routing
+      const response = await fetch("/api/match", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scores, program, selected_major: major }),
       });
@@ -154,7 +149,8 @@ export default function ResultsScreen() {
   const handlePivot = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/pivot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scores: userVector, program: userData.program, selected_major: selectedMajor, dream_job: dreamJobInput }) });
+      // FIX: Changed to relative URL for Vercel routing
+      const res = await fetch("/api/pivot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scores: userVector, program: userData.program, selected_major: selectedMajor, dream_job: dreamJobInput }) });
       if (!res.ok) throw new Error("Server error.");
       setPivotData(await res.json());
     } catch (err) { console.error(err); alert("Failed to generate analysis."); } finally { setIsActionLoading(false); }
@@ -163,7 +159,8 @@ export default function ResultsScreen() {
   const handlePostgrad = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/postgrad", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ program: userData.program, selected_major: selectedMajor, scores: userVector, postgrad_choice: postgradSelect }) });
+      // FIX: Changed to relative URL for Vercel routing
+      const res = await fetch("/api/postgrad", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ program: userData.program, selected_major: selectedMajor, scores: userVector, postgrad_choice: postgradSelect }) });
       if (!res.ok) throw new Error("Server error.");
       setPostgradData(await res.json());
     } catch (err) { console.error(err); alert("Failed to generate ROI."); } finally { setIsActionLoading(false); }
@@ -173,7 +170,8 @@ export default function ResultsScreen() {
     e.preventDefault(); if (!chatInput.trim()) return;
     const msg = chatInput; setChatInput(""); setChatMessages(p => [...p, { role: "user", content: msg }]); setIsChatLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: msg, program: userData.program, selected_major: selectedMajor, scores: userVector }) });
+      // FIX: Changed to relative URL for Vercel routing
+      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: msg, program: userData.program, selected_major: selectedMajor, scores: userVector }) });
       const data = await res.json(); setChatMessages(p => [...p, { role: "assistant", content: data.response }]);
     } catch { setChatMessages(p => [...p, { role: "assistant", content: "Connection error." }]); } finally { setIsChatLoading(false); }
   };
