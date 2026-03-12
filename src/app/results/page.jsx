@@ -70,7 +70,7 @@ export default function ResultsScreen() {
   // Main Fetch Logic
   const fetchRoadmap = async (scores, program, major) => {
     try {
-      // FIX: Changed to relative path so Vercel can route it internally
+      // Relative URL so Vercel internal routing takes over
       const response = await fetch("/api/match", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scores, program, selected_major: major }),
@@ -155,7 +155,6 @@ export default function ResultsScreen() {
   const handlePivot = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      // FIX: Changed to relative path
       const res = await fetch("/api/pivot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scores: userVector, program: userData.program, selected_major: selectedMajor, dream_job: dreamJobInput }) });
       if (!res.ok) throw new Error("Server error.");
       setPivotData(await res.json());
@@ -165,7 +164,6 @@ export default function ResultsScreen() {
   const handlePostgrad = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      // FIX: Changed to relative path
       const res = await fetch("/api/postgrad", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ program: userData.program, selected_major: selectedMajor, scores: userVector, postgrad_choice: postgradSelect }) });
       if (!res.ok) throw new Error("Server error.");
       setPostgradData(await res.json());
@@ -176,7 +174,6 @@ export default function ResultsScreen() {
     e.preventDefault(); if (!chatInput.trim()) return;
     const msg = chatInput; setChatInput(""); setChatMessages(p => [...p, { role: "user", content: msg }]); setIsChatLoading(true);
     try {
-      // FIX: Changed to relative path
       const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: msg, program: userData.program, selected_major: selectedMajor, scores: userVector }) });
       const data = await res.json(); setChatMessages(p => [...p, { role: "assistant", content: data.response }]);
     } catch { setChatMessages(p => [...p, { role: "assistant", content: "Connection error." }]); } finally { setIsChatLoading(false); }
