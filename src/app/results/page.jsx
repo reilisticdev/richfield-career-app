@@ -5,36 +5,30 @@ import { useRouter } from "next/navigation";
 import { supabase } from '../../lib/supabase'; 
 import ReactMarkdown from 'react-markdown'; 
 
-// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas
+// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas based STRICTLY on the Prospectus
 const programMajorsMapping = {
   "Bachelor of Science in Information Technology": [
     "Programming", 
     "Emerging Technologies", 
     "IT Management", 
-    "Network Engineering", 
-    "Business Analysis"
+    "Network Engineering"
   ],
   "Diploma in Information Technology": [
     "Programming", 
     "Network Engineering", 
     "Business Analysis"
   ],
-  "Bachelor of Business Administration (BBA)": [
-    "Accounting", 
-    "Human Resource Management", 
-    "Marketing Management", 
-    "Supply Chain Management"
+  "Master of Business Administration (MBA)": [
+    "Entrepreneurship and Innovation 900",
+    "Business Ethics and Corporate Governance 900",
+    "Women in Leadership",
+    "Emerging & Disruptive Technologies"
   ],
-  "Diploma in Business Administration": [
-    "Economics", 
-    "Public Management", 
-    "Human Resource Management", 
-    "Supply Chain Management"
-  ],
-  "Bachelor of Commerce (BCom) - Route 1 (AGA)": [
-    "Taxation", 
-    "Financial Management & Managerial Accounting", 
-    "Auditing and Assurance"
+  "Postgraduate Diploma in Management": [
+     "Operations Management 800",
+     "Entrepreneurship and Innovation 800",
+     "Public Sector Management 800",
+     "Data Analytics for Managers 800"
   ]
 };
 
