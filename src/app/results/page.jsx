@@ -5,30 +5,36 @@ import { useRouter } from "next/navigation";
 import { supabase } from '../../lib/supabase'; 
 import ReactMarkdown from 'react-markdown'; 
 
-// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas based STRICTLY on the Prospectus
+// 100% Accurate Mapping of Richfield Programmes to their specific Majors/Focus Areas
 const programMajorsMapping = {
   "Bachelor of Science in Information Technology": [
     "Programming", 
     "Emerging Technologies", 
     "IT Management", 
-    "Network Engineering"
+    "Network Engineering", 
+    "Business Analysis"
   ],
   "Diploma in Information Technology": [
     "Programming", 
     "Network Engineering", 
     "Business Analysis"
   ],
-  "Master of Business Administration (MBA)": [
-    "Entrepreneurship and Innovation 900",
-    "Business Ethics and Corporate Governance 900",
-    "Women in Leadership",
-    "Emerging & Disruptive Technologies"
+  "Bachelor of Business Administration (BBA)": [
+    "Accounting", 
+    "Human Resource Management", 
+    "Marketing Management", 
+    "Supply Chain Management"
   ],
-  "Postgraduate Diploma in Management": [
-     "Operations Management 800",
-     "Entrepreneurship and Innovation 800",
-     "Public Sector Management 800",
-     "Data Analytics for Managers 800"
+  "Diploma in Business Administration": [
+    "Economics", 
+    "Public Management", 
+    "Human Resource Management", 
+    "Supply Chain Management"
+  ],
+  "Bachelor of Commerce (BCom) - Route 1 (AGA)": [
+    "Taxation", 
+    "Financial Management & Managerial Accounting", 
+    "Auditing and Assurance"
   ]
 };
 
@@ -64,7 +70,7 @@ export default function ResultsScreen() {
   // Main Fetch Logic
   const fetchRoadmap = async (scores, program, major) => {
     try {
-      // FIX: Changed to relative URL for Vercel routing
+      // FIX: Changed to relative path so Vercel can route it internally
       const response = await fetch("/api/match", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scores, program, selected_major: major }),
@@ -149,7 +155,7 @@ export default function ResultsScreen() {
   const handlePivot = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      // FIX: Changed to relative URL for Vercel routing
+      // FIX: Changed to relative path
       const res = await fetch("/api/pivot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scores: userVector, program: userData.program, selected_major: selectedMajor, dream_job: dreamJobInput }) });
       if (!res.ok) throw new Error("Server error.");
       setPivotData(await res.json());
@@ -159,7 +165,7 @@ export default function ResultsScreen() {
   const handlePostgrad = async (e) => {
     e.preventDefault(); setIsActionLoading(true);
     try {
-      // FIX: Changed to relative URL for Vercel routing
+      // FIX: Changed to relative path
       const res = await fetch("/api/postgrad", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ program: userData.program, selected_major: selectedMajor, scores: userVector, postgrad_choice: postgradSelect }) });
       if (!res.ok) throw new Error("Server error.");
       setPostgradData(await res.json());
@@ -170,7 +176,7 @@ export default function ResultsScreen() {
     e.preventDefault(); if (!chatInput.trim()) return;
     const msg = chatInput; setChatInput(""); setChatMessages(p => [...p, { role: "user", content: msg }]); setIsChatLoading(true);
     try {
-      // FIX: Changed to relative URL for Vercel routing
+      // FIX: Changed to relative path
       const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: msg, program: userData.program, selected_major: selectedMajor, scores: userVector }) });
       const data = await res.json(); setChatMessages(p => [...p, { role: "assistant", content: data.response }]);
     } catch { setChatMessages(p => [...p, { role: "assistant", content: "Connection error." }]); } finally { setIsChatLoading(false); }
