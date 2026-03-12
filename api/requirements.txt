@@ -1,5 +1,5 @@
-Flask==3.0.0
-flask-cors==4.0.0
-google-generativeai==0.3.1
-python-dotenv==1.0.0
-PyPDF2==3.0.1
+Flask
+flask-cors
+google-generativeai>=0.5.0
+python-dotenv
+PyPDF2
